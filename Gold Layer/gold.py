@@ -1,11 +1,8 @@
-
 from pyspark.sql.functions import *
 from pyspark import pipelines as dp
 
 
-# =====================================================
 # 1. CUSTOMER CHANGE SOURCE
-# =====================================================
 
 @dp.temporary_view(name="customer_changes")
 def customer_changes():
@@ -45,9 +42,7 @@ def customer_changes():
     return df
 
 
-# =====================================================
 # 2. CUSTOMER HISTORY - SCD TYPE 2
-# =====================================================
 
 dp.create_streaming_table("customer_history_scd")
 
@@ -77,9 +72,7 @@ dp.create_auto_cdc_flow(
 )
 
 
-# =====================================================
 # 3. CUSTOMER DIMENSION
-# =====================================================
 
 @dp.materialized_view(name="dim_customer")
 def dim_customer():
@@ -147,9 +140,7 @@ def dim_customer():
     )
 
 
-# =====================================================
 # 4. PRODUCT DIMENSION
-# =====================================================
 
 @dp.materialized_view(name="dim_product")
 def dim_product():
@@ -171,9 +162,7 @@ def dim_product():
     return df
 
 
-# =====================================================
 # 5. PAYMENT DIMENSION
-# =====================================================
 
 @dp.materialized_view(name="dim_payment")
 def dim_payment():
@@ -199,9 +188,7 @@ def dim_payment():
     return df
 
 
-# =====================================================
 # 6. DATE DIMENSION
-# =====================================================
 
 @dp.materialized_view(name="dim_date")
 def dim_date():
@@ -286,9 +273,7 @@ def dim_date():
     return df
 
 
-# =====================================================
 # 7. FACT ORDERS
-# =====================================================
 
 @dp.materialized_view(name="fact_orders")
 def fact_orders():
@@ -303,9 +288,6 @@ def fact_orders():
 
     order_date_dim = date_dim.alias("od")
     delivery_date_dim = date_dim.alias("dd")
-
-
-    # CUSTOMER JOIN - SCD TYPE 2
 
     order_event = struct(
         col("s.order_date"),
@@ -327,17 +309,11 @@ def fact_orders():
         "left"
     )
 
-
-    # PRODUCT JOIN
-
     df = df.join(
         product_dim,
         col("s.product_id") == col("p.product_id"),
         "left"
     )
-
-
-    # PAYMENT JOIN
 
     df = df.join(
         payment_dim,
@@ -348,17 +324,11 @@ def fact_orders():
         "left"
     )
 
-
-    # ORDER DATE JOIN
-
     df = df.join(
         order_date_dim,
         col("s.order_date") == col("od.date"),
         "left"
     )
-
-
-    # DELIVERY DATE JOIN
 
     df = df.join(
         delivery_date_dim,
@@ -366,14 +336,10 @@ def fact_orders():
         "left"
     )
 
-
-    # FINAL FACT TABLE
-
     df = df.select(
 
         col("s.order_id"),
 
-        # Foreign keys
         col("c.customer_key"),
         col("p.product_key"),
         col("pay.payment_key"),
@@ -381,7 +347,6 @@ def fact_orders():
         col("od.date_key").alias("order_date_key"),
         col("dd.date_key").alias("delivery_date_key"),
 
-        # Measures
         col("s.quantity"),
         col("s.product_price"),
         col("s.discount"),
@@ -390,14 +355,11 @@ def fact_orders():
         col("s.profit_margin"),
         col("s.gross_item_value"),
 
-        # Delivery analysis
         col("s.delivery_days"),
         col("s.delivery_status"),
 
-        # Return indicator
         col("s.is_returned"),
 
-        # Metadata
         col("s.ingestion_timestamp"),
         col("s.source_file_path")
 
@@ -406,9 +368,7 @@ def fact_orders():
     return df
 
 
-# =====================================================
 # 8. FACT RETURNS
-# =====================================================
 
 @dp.materialized_view(name="fact_returns")
 def fact_returns():
@@ -428,9 +388,6 @@ def fact_returns():
     order_date_dim = date_dim.alias("od")
     return_date_dim = date_dim.alias("rd")
 
-
-    # CUSTOMER JOIN - SCD TYPE 2
-
     order_event = struct(
         col("s.order_date"),
         col("s.order_id")
@@ -451,17 +408,11 @@ def fact_returns():
         "left"
     )
 
-
-    # PRODUCT JOIN
-
     df = df.join(
         product_dim,
         col("s.product_id") == col("p.product_id"),
         "left"
     )
-
-
-    # PAYMENT JOIN
 
     df = df.join(
         payment_dim,
@@ -472,17 +423,11 @@ def fact_returns():
         "left"
     )
 
-
-    # ORDER DATE JOIN
-
     df = df.join(
         order_date_dim,
         col("s.order_date") == col("od.date"),
         "left"
     )
-
-
-    # RETURN DATE JOIN
 
     df = df.join(
         return_date_dim,
@@ -490,14 +435,10 @@ def fact_returns():
         "left"
     )
 
-
-    # FINAL FACT TABLE
-
     df = df.select(
 
         col("s.order_id"),
 
-        # Foreign keys
         col("c.customer_key"),
         col("p.product_key"),
         col("pay.payment_key"),
@@ -505,18 +446,15 @@ def fact_returns():
         col("od.date_key").alias("order_date_key"),
         col("rd.date_key").alias("return_date_key"),
 
-        # Return details
         col("s.return_reason"),
         col("s.return_days"),
 
-        # Financial measures
         col("s.quantity"),
         col("s.product_price"),
         col("s.total_amount"),
         col("s.shipping_cost"),
         col("s.profit_margin"),
 
-        # Metadata
         col("s.ingestion_timestamp"),
         col("s.source_file_path")
 
