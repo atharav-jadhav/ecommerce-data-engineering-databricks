@@ -1,15 +1,8 @@
-
 from pyspark.sql.functions import *
 from pyspark import pipelines as dp
 
 
-# =====================================================
-# SILVER TABLE
-# =====================================================
-
 @dp.table(name="silver")
-
-# DROP EXPECTATIONS
 
 @dp.expect_or_drop(
     "valid_order_id",
@@ -41,8 +34,6 @@ from pyspark import pipelines as dp
     "total_amount >= 0"
 )
 
-# WARN EXPECTATIONS
-
 @dp.expect(
     "valid_delivery_date",
     """
@@ -61,13 +52,7 @@ from pyspark import pipelines as dp
 
 def silver():
 
-    # Read Bronze
     df = spark.readStream.table("bronze")
-
-
-    # =================================================
-    # 1. FLATTEN NESTED COLUMNS
-    # =================================================
 
     df = df.select(
 
@@ -113,11 +98,6 @@ def silver():
         col("source_file_path")
     )
 
-
-    # =================================================
-    # 2. CALCULATE DELIVERY DAYS
-    # =================================================
-
     df = df.withColumn(
         "delivery_days",
         datediff(
@@ -125,11 +105,6 @@ def silver():
             col("order_date")
         )
     )
-
-
-    # =================================================
-    # 3. CLASSIFY DELIVERY STATUS
-    # =================================================
 
     df = df.withColumn(
         "delivery_status",
@@ -152,11 +127,6 @@ def silver():
         .otherwise("Delayed")
     )
 
-
-    # =================================================
-    # 4. CONVERT RETURNED INTO 1 OR 0
-    # =================================================
-
     df = df.withColumn(
         "is_returned",
 
@@ -173,11 +143,6 @@ def silver():
         .otherwise(None)
     )
 
-
-    # =================================================
-    # 5. CALCULATE RETURN DAYS
-    # =================================================
-
     df = df.withColumn(
         "return_days",
         datediff(
@@ -186,29 +151,14 @@ def silver():
         )
     )
 
-
-    # =================================================
-    # 6. CALCULATE GROSS ITEM VALUE
-    # =================================================
-
     df = df.withColumn(
         "gross_item_value",
         col("product_price") * col("quantity")
     )
 
-
-    # =================================================
-    # 7. SILVER PROCESSING TIMESTAMP
-    # =================================================
-
     df = df.withColumn(
         "silver_processed_timestamp",
         current_timestamp()
     )
-
-
-    # =================================================
-    # 8. RETURN FINAL DATAFRAME
-    # =================================================
 
     return df
