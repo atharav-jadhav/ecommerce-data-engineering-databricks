@@ -14,6 +14,7 @@ It also incorporates hash-based surrogate keys, incremental data ingestion, and 
 
 - Ingest raw E-Commerce JSON data into Databricks.
 - Implement the Medallion Architecture using Bronze, Silver, and Gold layers.
+- Use Auto Loader for scalable and incremental file ingestion.
 - Flatten nested JSON structures and transform raw data into structured records.
 - Apply data quality checks and validation rules.
 - Design dimension and fact tables for structured data modeling.
@@ -140,22 +141,27 @@ The original dataset is not included in this repository because of its size. Sma
 ```text
 ecommerce-data-engineering-databricks/
 │
-├── README.md
-├── src/
-│   ├── bronze.py
-│   ├── silver.py
+├── Bronze Layer/
+│   └── bronze.py
+│
+├── Silver Layer/
+│   └── silver.py
+│
+├── Gold Layer/
 │   └── gold.py
 │
-├── test_data/
-│   ├── test_01_new_records.json
-│   └── test_02_customer_update.json
+├── Source Data/
+│   └── ecommerce_nested.json
 │
 ├── screenshots/
+│   └── pipeline_1.png
+│   └── Output Tables.png
 │
-├── docs/
+├── test_data/
+│   └── new_file_ecommerce_1.json
+│   └── new_file_ecommerce_2.json
 │
-├── .gitignore
-└── LICENSE
+└── README.md
 ```
 
 ## Testing Strategy
@@ -254,7 +260,7 @@ Through this project, I explored and implemented:
 
 ## Author
 
-**[Your Name]**
+Atharav Jadhav
 
 Data Engineering Project
 
