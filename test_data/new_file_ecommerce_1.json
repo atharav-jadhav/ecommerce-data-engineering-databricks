@@ -1,0 +1,69 @@
+
+[
+  {
+    "order": {
+      "order_id": "O900001",
+      "order_date": "12/9/2025",
+      "delivered_date": "16/9/2025"
+    },
+    "customer": {
+      "customer_id": "C19001",
+      "age": 29,
+      "gender": "Female",
+      "region": "West"
+    },
+    "product": {
+      "product_id": "P290001",
+      "category": "Electronics",
+      "price": 250.0
+    },
+    "payment": {
+      "payment_method": "UPI"
+    },
+    "return": {
+      "returned": "No",
+      "request_date": null,
+      "return_reason": null
+    },
+    "financials": {
+      "discount": 0.10,
+      "quantity": 1,
+      "total_amount": 225.0,
+      "shipping_cost": 8.5,
+      "profit_margin": 42.0
+    }
+  },
+  {
+    "order": {
+      "order_id": "O900002",
+      "order_date": "13/9/2025",
+      "delivered_date": "18/9/2025"
+    },
+    "customer": {
+      "customer_id": "C19002",
+      "age": 41,
+      "gender": "Male",
+      "region": "North"
+    },
+    "product": {
+      "product_id": "P290002",
+      "category": "Home",
+      "price": 120.0
+    },
+    "payment": {
+      "payment_method": "Credit Card"
+    },
+    "return": {
+      "returned": "Yes",
+      "request_date": "20/9/2025",
+      "return_reason": "Damaged product"
+    },
+    "financials": {
+      "discount": 0.05,
+      "quantity": 2,
+      "total_amount": 228.0,
+      "shipping_cost": 9.0,
+      "profit_margin": 35.0
+    }
+  }
+]
